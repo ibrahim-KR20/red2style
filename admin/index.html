@@ -3,32 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل دخول - لوحة التحكم</title>
+  <title>تسجيل الدخول - لوحة التحكم</title>
   <link rel="stylesheet" href="admin.css" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #e63946, #ff6b00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #e63946;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #e63946;
+      color: #fff;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff6b00;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>🔐 لوحة التحكم - RED 2 STYLE</h2>
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="اسم المستخدم" required />
-      <input type="password" id="password" placeholder="كلمة المرور" required />
-      <button type="submit">تسجيل الدخول</button>
-    </form>
-    <p class="hint">اسم المستخدم: admin | كلمة المرور: 12345</p>
+  <div class="login-box">
+    <h2>لوحة تحكم RED 2 STYLE</h2>
+    <input type="text" id="username" placeholder="اسم المستخدم" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <button onclick="login()">تسجيل الدخول</button>
+    <div class="error" id="error"></div>
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u = document.getElementById('username').value;
-      const p = document.getElementById('password').value;
-      if (u === 'admin' && p === '12345') {
-        localStorage.setItem('loggedIn', 'true');
-        window.location.href = 'dashboard.html';
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const error = document.getElementById("error");
+
+      // ✅ بيانات الدخول التي حددناها
+      const USERNAME = "admin";
+      const PASSWORD = "12345";
+
+      if (user === USERNAME && pass === PASSWORD) {
+        // حفظ حالة تسجيل الدخول
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "dashboard.html";
       } else {
-        alert('❌ اسم المستخدم أو كلمة المرور غير صحيحة');
+        error.textContent = "❌ اسم المستخدم أو كلمة المرور غير صحيحة";
       }
-    });
+    }
   </script>
 </body>
 </html>
