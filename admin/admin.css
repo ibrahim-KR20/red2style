@@ -1,0 +1,70 @@
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #0b0b0b;
+  color: #fff;
+  margin: 0;
+  direction: rtl;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  background: #e63946;
+  padding: 15px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header button {
+  background: #fff;
+  color: #e63946;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+main {
+  padding: 20px;
+}
+
+section {
+  background: #111;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input, textarea, button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #ff6b00;
+  color: #fff;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #333;
+  text-align: center;
+}
+
+img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
