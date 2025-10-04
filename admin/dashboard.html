@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم - RED 2 STYLE</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header>
+    <h1>لوحة تحكم الموقع 🛠️</h1>
+    <button onclick="logout()">تسجيل الخروج</button>
+  </header>
+
+  <main>
+    <section>
+      <h2>➕ إضافة منتج جديد</h2>
+      <form id="productForm">
+        <input type="text" id="name" placeholder="اسم المنتج" required />
+        <input type="text" id="price" placeholder="السعر" required />
+        <input type="text" id="colors" placeholder="الألوان (افصلها بفواصل)" />
+        <input type="text" id="sizes" placeholder="المقاسات (S,M,L...)" />
+        <textarea id="description" placeholder="وصف المنتج"></textarea>
+        <input type="file" id="image" accept="image/*" required />
+        <button type="submit">💾 حفظ المنتج</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>📦 قائمة المنتجات</h2>
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>الصورة</th>
+            <th>الاسم</th>
+            <th>السعر</th>
+            <th>خيارات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>📝 من نحن</h2>
+      <textarea id="about" placeholder="اكتب نص التعريف بالمحل هنا..."></textarea>
+      <button onclick="saveAbout()">💾 حفظ التعريف</button>
+    </section>
+
+    <section>
+      <h2>💬 آراء العملاء</h2>
+      <textarea id="reviews" placeholder="أدخل الآراء مفصولة بخط جديد"></textarea>
+      <button onclick="saveReviews()">💾 حفظ الآراء</button>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
