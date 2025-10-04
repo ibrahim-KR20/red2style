@@ -5,55 +5,237 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لوحة التحكم - RED 2 STYLE</title>
   <link rel="stylesheet" href="admin.css" />
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: linear-gradient(90deg, #e63946, #ff6b00);
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #e63946;
+      margin-top: 40px;
+      border-bottom: 2px solid #ff6b00;
+      padding-bottom: 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background: #e63946;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #ff6b00;
+    }
+
+    .product {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .product img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 15px;
+    }
+
+    .actions button {
+      margin-left: 10px;
+      background: #333;
+    }
+
+    .actions button.delete {
+      background: #e63946;
+    }
+
+    .logout {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #333;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .logout:hover {
+      background: #e63946;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>لوحة تحكم الموقع 🛠️</h1>
-    <button onclick="logout()">تسجيل الخروج</button>
-  </header>
 
-  <main>
-    <section>
-      <h2>➕ إضافة منتج جديد</h2>
-      <form id="productForm">
-        <input type="text" id="name" placeholder="اسم المنتج" required />
-        <input type="text" id="price" placeholder="السعر" required />
-        <input type="text" id="colors" placeholder="الألوان (افصلها بفواصل)" />
-        <input type="text" id="sizes" placeholder="المقاسات (S,M,L...)" />
-        <textarea id="description" placeholder="وصف المنتج"></textarea>
-        <input type="file" id="image" accept="image/*" required />
-        <button type="submit">💾 حفظ المنتج</button>
-      </form>
-    </section>
+  <header>📊 لوحة التحكم - RED 2 STYLE</header>
+  <div class="logout" onclick="logout()">🔐 تسجيل الخروج</div>
 
-    <section>
-      <h2>📦 قائمة المنتجات</h2>
-      <table id="productsTable">
-        <thead>
-          <tr>
-            <th>الصورة</th>
-            <th>الاسم</th>
-            <th>السعر</th>
-            <th>خيارات</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+  <div class="container">
 
-    <section>
-      <h2>📝 من نحن</h2>
-      <textarea id="about" placeholder="اكتب نص التعريف بالمحل هنا..."></textarea>
-      <button onclick="saveAbout()">💾 حفظ التعريف</button>
-    </section>
+    <!-- إضافة منتج جديد -->
+    <h2>📦 إضافة منتج جديد</h2>
+    <input type="text" id="name" placeholder="اسم المنتج" />
+    <input type="text" id="price" placeholder="السعر" />
+    <textarea id="description" placeholder="وصف المنتج"></textarea>
+    <input type="file" id="img" />
+    <button onclick="addProduct()">➕ إضافة المنتج</button>
 
-    <section>
-      <h2>💬 آراء العملاء</h2>
-      <textarea id="reviews" placeholder="أدخل الآراء مفصولة بخط جديد"></textarea>
-      <button onclick="saveReviews()">💾 حفظ الآراء</button>
-    </section>
-  </main>
+    <!-- عرض جميع المنتجات -->
+    <h2>🧥 جميع المنتجات</h2>
+    <div id="products"></div>
 
-  <script src="admin.js"></script>
+    <!-- تعديل قسم من نحن -->
+    <h2>📄 قسم من نحن</h2>
+    <textarea id="about" rows="4"></textarea>
+    <button onclick="saveAbout()">💾 حفظ التعديلات</button>
+
+    <!-- تعديل آراء العملاء -->
+    <h2>💬 آراء العملاء (اكتب كل رأي في سطر)</h2>
+    <textarea id="reviews" rows="4"></textarea>
+    <button onclick="saveReviews()">💾 حفظ الآراء</button>
+
+  </div>
+
+  <script>
+    // ✅ التحقق من تسجيل الدخول
+    if (localStorage.getItem("loggedIn") !== "true") {
+      window.location.href = "index.html";
+    }
+
+    const productsDiv = document.getElementById("products");
+
+    // تحميل المنتجات من localStorage
+    let products = JSON.parse(localStorage.getItem("products") || "[]");
+    displayProducts();
+
+    function addProduct() {
+      const name = document.getElementById("name").value;
+      const price = document.getElementById("price").value;
+      const description = document.getElementById("description").value;
+      const imgInput = document.getElementById("img").files[0];
+
+      if (!name || !price || !imgInput) {
+        alert("❗ الرجاء إدخال اسم المنتج والسعر والصورة");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const newProduct = {
+          name,
+          price,
+          description,
+          img: e.target.result
+        };
+        products.push(newProduct);
+        localStorage.setItem("products", JSON.stringify(products));
+        displayProducts();
+        resetForm();
+      };
+      reader.readAsDataURL(imgInput);
+    }
+
+    function displayProducts() {
+      productsDiv.innerHTML = "";
+      if (products.length === 0) {
+        productsDiv.innerHTML = "<p>🚀 لا توجد منتجات بعد</p>";
+        return;
+      }
+
+      products.forEach((p, index) => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <div style="display:flex;align-items:center;">
+            <img src="${p.img}" alt="${p.name}">
+            <div>
+              <strong>${p.name}</strong><br>
+              <small>${p.price}</small>
+            </div>
+          </div>
+          <div class="actions">
+            <button onclick="deleteProduct(${index})" class="delete">🗑️ حذف</button>
+          </div>
+        `;
+        productsDiv.appendChild(div);
+      });
+    }
+
+    function deleteProduct(index) {
+      if (confirm("هل تريد حذف هذا المنتج؟")) {
+        products.splice(index, 1);
+        localStorage.setItem("products", JSON.stringify(products));
+        displayProducts();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("name").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("description").value = "";
+      document.getElementById("img").value = "";
+    }
+
+    // قسم من نحن
+    const aboutInput = document.getElementById("about");
+    aboutInput.value = localStorage.getItem("about") || "";
+    function saveAbout() {
+      localStorage.setItem("about", aboutInput.value);
+      alert("✅ تم حفظ قسم من نحن بنجاح!");
+    }
+
+    // قسم الآراء
+    const reviewsInput = document.getElementById("reviews");
+    reviewsInput.value = localStorage.getItem("reviews") || "";
+    function saveReviews() {
+      localStorage.setItem("reviews", reviewsInput.value);
+      alert("✅ تم حفظ آراء العملاء!");
+    }
+
+    // تسجيل الخروج
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "index.html";
+    }
+  </script>
 </body>
 </html>
