@@ -6,67 +6,182 @@
   <title>لوحة التحكم - RED 2 STYLE</title>
   <link rel="stylesheet" href="admin.css" />
 </head>
-<body class="dashboard-body">
-
-  <header class="dashboard-header">
-    <h1>📊 لوحة التحكم - RED 2 STYLE</h1>
-    <button id="logoutBtn" class="btn-logout">تسجيل الخروج</button>
+<body>
+  <header>
+    <h1>لوحة تحكم RED 2 STYLE</h1>
+    <button onclick="logout()">تسجيل الخروج</button>
   </header>
 
-  <main class="dashboard-main">
-    <section class="add-product">
-      <h2>➕ إضافة / تعديل منتج</h2>
-      <form id="productForm">
+  <div class="container">
+    <!-- 🧾 نموذج إضافة أو تعديل منتج -->
+    <section id="productForm">
+      <h2>إضافة / تعديل منتج</h2>
+      <form id="addProductForm" onsubmit="return saveProduct(event)">
         <input type="hidden" id="productId" />
+        <label>اسم المنتج:</label>
+        <input type="text" id="name" required />
 
-        <label>📌 اسم المنتج:</label>
-        <input type="text" id="title" required />
+        <label>وصف المنتج:</label>
+        <textarea id="description" rows="3"></textarea>
 
-        <label>💰 السعر:</label>
+        <label>السعر (بالليرة):</label>
         <input type="number" id="price" required />
 
-        <label>📝 الوصف:</label>
-        <textarea id="description" required></textarea>
-
-        <label>🎨 الألوان (مفصولة بفاصلة):</label>
-        <input type="text" id="colors" placeholder="أحمر, أسود, أبيض" />
-
-        <label>📏 المقاسات (مفصولة بفاصلة):</label>
+        <label>المقاسات (افصل بينها بفاصلة):</label>
         <input type="text" id="sizes" placeholder="S, M, L, XL" />
 
-        <label>📸 صورة المنتج:</label>
-        <input type="file" id="imageFile" accept="image/*" />
+        <label>الألوان (افصل بينها بفاصلة):</label>
+        <input type="text" id="colors" placeholder="أحمر, أسود, أبيض" />
 
-        <label>⭐ عرض في بانر العروض:</label>
-        <select id="isFeatured">
-          <option value="false">❌ لا</option>
-          <option value="true">✅ نعم</option>
-        </select>
+        <label>صورة المنتج:</label>
+        <input type="file" id="image" accept="image/*" />
 
-        <button type="submit" class="btn-save">💾 حفظ المنتج</button>
+        <label>
+          <input type="checkbox" id="featured" />
+          مميز (يظهر في الصفحة الرئيسية)
+        </label>
+
+        <button type="submit">💾 حفظ المنتج</button>
       </form>
     </section>
 
-    <section class="product-list">
+    <!-- 📦 عرض كل المنتجات -->
+    <section id="productList">
       <h2>📦 قائمة المنتجات</h2>
-      <table id="productsTable">
+      <table>
         <thead>
           <tr>
-            <th>📸 الصورة</th>
-            <th>📌 الاسم</th>
-            <th>💰 السعر</th>
-            <th>🎨 الألوان</th>
-            <th>📏 المقاسات</th>
-            <th>⭐ بانر</th>
-            <th>⚙️ إدارة</th>
+            <th>الصورة</th>
+            <th>الاسم</th>
+            <th>الوصف</th>
+            <th>السعر</th>
+            <th>المقاسات</th>
+            <th>الألوان</th>
+            <th>مميز</th>
+            <th>العمليات</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="productsTable"></tbody>
       </table>
     </section>
-  </main>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="admin.js"></script>
+  <script type="module">
+    // 🛠️ إعدادات Supabase
+    const SUPABASE_URL = "https://qbkkdsmhnmmrzsdewhde.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFia2tkc21obm1tcnpzZGV3aGRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MjQzMTIsImV4cCI6MjA3NTEwMDMxMn0.opDK0TlCbfCNlLpvMWFxM79myJkgUCIbufw1pbw8bP0";
+
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 📤 حفظ المنتج
+    async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById("productId").value;
+      const name = document.getElementById("name").value;
+      const description = document.getElementById("description").value;
+      const price = parseFloat(document.getElementById("price").value);
+      const sizes = document.getElementById("sizes").value;
+      const colors = document.getElementById("colors").value;
+      const featured = document.getElementById("featured").checked;
+      const imageFile = document.getElementById("image").files[0];
+
+      let imageUrl = null;
+
+      if (imageFile) {
+        const fileName = `${Date.now()}-${imageFile.name}`;
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage.from("products-images")
+          .upload(fileName, imageFile);
+
+        if (uploadError) {
+          alert("حدث خطأ أثناء رفع الصورة");
+          return;
+        }
+
+        imageUrl = `${SUPABASE_URL}/storage/v1/object/public/products-images/${fileName}`;
+      }
+
+      const productData = {
+        name,
+        description,
+        price,
+        sizes,
+        colors,
+        featured,
+        ...(imageUrl && { image_url: imageUrl }),
+      };
+
+      let result;
+      if (id) {
+        result = await supabase.from("products").update(productData).eq("id", id);
+      } else {
+        result = await supabase.from("products").insert([productData]);
+      }
+
+      if (result.error) {
+        alert("❌ حدث خطأ أثناء حفظ المنتج");
+        console.log(result.error);
+      } else {
+        alert("✅ تم حفظ المنتج بنجاح");
+        document.getElementById("addProductForm").reset();
+        document.getElementById("productId").value = "";
+        loadProducts();
+      }
+    }
+
+    // 📥 تحميل المنتجات
+    async function loadProducts() {
+      const { data, error } = await supabase.from("products").select("*").order("id", { ascending: false });
+      if (error) return console.error(error);
+
+      const tbody = document.getElementById("productsTable");
+      tbody.innerHTML = "";
+      data.forEach((p) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><img src="${p.image_url || ''}" /></td>
+            <td>${p.name}</td>
+            <td>${p.description || ''}</td>
+            <td>${p.price} ل.س</td>
+            <td>${p.sizes || '-'}</td>
+            <td>${p.colors || '-'}</td>
+            <td>${p.featured ? "⭐" : "—"}</td>
+            <td>
+              <button onclick="editProduct(${p.id})">✏️ تعديل</button>
+              <button onclick="deleteProduct(${p.id})">🗑️ حذف</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // ✏️ تعديل المنتج
+    window.editProduct = async function (id) {
+      const { data } = await supabase.from("products").select("*").eq("id", id).single();
+      if (!data) return;
+      document.getElementById("productId").value = data.id;
+      document.getElementById("name").value = data.name;
+      document.getElementById("description").value = data.description;
+      document.getElementById("price").value = data.price;
+      document.getElementById("sizes").value = data.sizes;
+      document.getElementById("colors").value = data.colors;
+      document.getElementById("featured").checked = data.featured;
+    };
+
+    // 🗑️ حذف المنتج
+    window.deleteProduct = async function (id) {
+      if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (!error) loadProducts();
+    };
+
+    // 🚪 تسجيل الخروج
+    window.logout = function () {
+      window.location.href = "index.html";
+    };
+
+    loadProducts();
+  </script>
 </body>
 </html>
