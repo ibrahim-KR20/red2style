@@ -1,238 +1,150 @@
-// admin/admin.js
+// 🔐 حماية لوحة التحكم - التحقق من تسجيل الدخول
+if (localStorage.getItem("loggedIn") !== "true") {
+  window.location.href = "index.html";
+}
+
+// 📤 إعداد اتصال Supabase
 const SUPABASE_URL = "https://qbkkdsmhnmmrzsdewhde.supabase.co";
-const SUPABASE_ANON_KEY = "<ضع_هنا_مفتاح_anon_الذي_أرسلته>";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFia2tkc21obm1tcnpzZGV3aGRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MjQzMTIsImV4cCI6MjA3NTEwMDMxMn0.opDK0TlCbfCNlLpvMWFxM79myJkgUCIbufw1pbw8bP0";
 
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ---------- Login (index.html) ----------
-if (location.pathname.endsWith('index.html')) {
-  document.getElementById('btnLogin').addEventListener('click', async () => {
-    const u = document.getElementById('inpUser').value.trim();
-    const p = document.getElementById('inpPass').value.trim();
-    const err = document.getElementById('loginError');
+// 🏷️ عناصر الصفحة
+const productForm = document.getElementById("productForm");
+const productsTable = document.getElementById("productsTable").querySelector("tbody");
+const logoutBtn = document.getElementById("logoutBtn");
 
-    if (!u || !p) { err.textContent = 'الرجاء إدخال اسم المستخدم وكلمة المرور'; return; }
+// 📤 تسجيل الخروج
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("loggedIn");
+  window.location.href = "index.html";
+});
 
-    // تحقق من جدول admin في Supabase
-    const { data, error } = await supabase
-      .from('admin')
-      .select('*')
-      .eq('username', u)
-      .limit(1);
+// 📦 تحميل المنتجات عند فتح الصفحة
+window.addEventListener("DOMContentLoaded", loadProducts);
 
-    if (error) { err.textContent = 'خطأ في الاتصال بقاعدة البيانات'; console.error(error); return; }
-    if (!data || data.length === 0) { err.textContent = 'مستخدم غير موجود'; return; }
+// 🧾 تحميل المنتجات من Supabase
+async function loadProducts() {
+  const { data, error } = await supabase.from("products").select("*").order("id", { ascending: true });
 
-    const admin = data[0];
-    if (admin.password === p) {
-      localStorage.setItem('adminUser', u);
-      // انتقل إلى لوحة التحكم
-      location.href = 'dashboard.html';
-    } else {
-      err.textContent = 'كلمة المرور خاطئة';
-    }
+  if (error) {
+    console.error("❌ خطأ في جلب المنتجات:", error);
+    return;
+  }
+
+  productsTable.innerHTML = "";
+
+  data.forEach(product => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><img src="${product.image || ''}" width="70"></td>
+      <td>${product.title}</td>
+      <td>${product.price} ₺</td>
+      <td>${product.colors || '-'}</td>
+      <td>${product.sizes || '-'}</td>
+      <td>${product.is_featured ? "⭐" : "❌"}</td>
+      <td>
+        <button onclick="editProduct(${product.id})">✏️ تعديل</button>
+        <button onclick="deleteProduct(${product.id})">🗑️ حذف</button>
+      </td>
+    `;
+    productsTable.appendChild(tr);
   });
 }
 
-// ---------- Dashboard logic ----------
-if (location.pathname.endsWith('dashboard.html')) {
-  // DOM elements
-  const btnLogout = document.getElementById('btnLogout');
-  const btnSave = document.getElementById('btnSave');
-  const btnClear = document.getElementById('btnClear');
-  const productsList = document.getElementById('productsList');
+// ➕ إضافة / تعديل منتج
+productForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  // Auth guard
-  const adminUser = localStorage.getItem('adminUser');
-  if (!adminUser) { location.href = 'index.html'; }
+  const id = document.getElementById("productId").value;
+  const title = document.getElementById("title").value;
+  const price = document.getElementById("price").value;
+  const description = document.getElementById("description").value;
+  const colors = document.getElementById("colors").value;
+  const sizes = document.getElementById("sizes").value;
+  const is_featured = document.getElementById("isFeatured").value === "true";
+  const imageFile = document.getElementById("imageFile").files[0];
 
-  // Load initial content
-  loadProducts();
-  loadAboutAndReviews();
+  let imageUrl = "";
 
-  // Save product (create or update)
-  btnSave.addEventListener('click', async () => {
-    const id = document.getElementById('prodId').value || null;
-    const name = document.getElementById('name').value.trim();
-    const price = document.getElementById('price').value.trim();
-    const colors = document.getElementById('colors').value.trim();
-    const sizes = document.getElementById('sizes').value.trim();
-    const description = document.getElementById('description').value.trim();
-    const fileInput = document.getElementById('image');
+  // 📤 رفع الصورة إن وُجدت
+  if (imageFile) {
+    const fileName = `${Date.now()}_${imageFile.name}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("products-images")
+      .upload(fileName, imageFile);
 
-    if (!name || !price) { alert('الرجاء إدخال اسم المنتج والسعر'); return; }
-
-    try {
-      let image_url = document.getElementById('existingImage') ? document.getElementById('existingImage').value : '';
-
-      // إذا تم اختيار ملف جديد
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        // unique path
-        const filename = `${Date.now()}_${file.name.replace(/\s/g,'_')}`;
-        const { data: upData, error: upErr } = await supabase.storage
-          .from('products-images')
-          .upload(filename, file, { cacheControl: '3600', upsert: false });
-
-        if (upErr) { console.error(upErr); alert('فشل رفع الصورة'); return; }
-
-        // الحصول على URL عام
-        const { data: publicData } = supabase.storage.from('products-images').getPublicUrl(upData.path);
-        image_url = publicData.publicUrl;
-      }
-
-      if (!id) {
-        // إنشاء
-        const { data, error } = await supabase.from('products').insert([{
-          name, price, colors, sizes, description, image_url
-        }]).select().single();
-        if (error) throw error;
-        alert('تم إضافة المنتج');
-      } else {
-        // تحديث
-        const { data, error } = await supabase.from('products').update({
-          name, price, colors, sizes, description, image_url
-        }).eq('id', id);
-        if (error) throw error;
-        alert('تم تحديث المنتج');
-      }
-
-      clearForm();
-      await loadProducts();
-    } catch (e) {
-      console.error(e);
-      alert('حدث خطأ أثناء الحفظ');
+    if (uploadError) {
+      alert("❌ خطأ في رفع الصورة: " + uploadError.message);
+      return;
     }
-  });
 
-  // تفريغ النموذج
-  btnClear.addEventListener('click', clearForm);
+    const { data: publicUrl } = supabase.storage
+      .from("products-images")
+      .getPublicUrl(fileName);
 
-  // تحميل المنتجات وعرضها
-  async function loadProducts() {
-    productsList.innerHTML = 'جارٍ التحميل...';
-    const { data, error } = await supabase.from('products').select('*').order('id', { ascending: false });
-    if (error) { productsList.innerHTML = '<div class="error">خطأ في جلب المنتجات</div>'; console.error(error); return; }
-    if (!data || data.length === 0) { productsList.innerHTML = '<div class="hint">لا توجد منتجات حالياً</div>'; return; }
-
-    productsList.innerHTML = '';
-    data.forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <img src="${p.image_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${p.name}" />
-        <div style="flex:1">
-          <strong>${p.name}</strong><br/>
-          <small>${p.price}</small><br/>
-          <small>الألوان: ${p.colors || '-'}</small><br/>
-          <small>المقاسات: ${p.sizes || '-'}</small><br/>
-          <p style="margin-top:6px;color:#ccc">${p.description || ''}</p>
-        </div>
-        <div class="controls">
-          <button class="edit" data-id="${p.id}">✏️ تعديل</button>
-          <button class="delete" data-id="${p.id}">🗑️ حذف</button>
-        </div>
-      `;
-      productsList.appendChild(div);
-    });
-
-    // أحداث أزرار التحرير والحذف
-    document.querySelectorAll('.controls .edit').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const id = btn.dataset.id;
-        const { data } = await supabase.from('products').select('*').eq('id', id).single();
-        if (!data) return alert('لم يتم إيجاد المنتج');
-        // املأ النموذج بالقيم
-        document.getElementById('prodId').value = data.id;
-        document.getElementById('name').value = data.name;
-        document.getElementById('price').value = data.price;
-        document.getElementById('colors').value = data.colors;
-        document.getElementById('sizes').value = data.sizes;
-        document.getElementById('description').value = data.description;
-        // ضع حقل مخفي يحمل رابط الصورة القائمة
-        if (!document.getElementById('existingImage')) {
-          const inp = document.createElement('input');
-          inp.type = 'hidden'; inp.id = 'existingImage'; inp.value = data.image_url || '';
-          document.querySelector('.card').appendChild(inp);
-        } else document.getElementById('existingImage').value = data.image_url || '';
-        window.scrollTo({top:0,behavior:'smooth'});
-      });
-    });
-
-    document.querySelectorAll('.controls .delete').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        if (!confirm('هل تريد حذف هذا المنتج؟')) return;
-        const { error } = await supabase.from('products').delete().eq('id', id);
-        if (error) { alert('خطأ عند الحذف'); console.error(error); return; }
-        alert('تم الحذف');
-        loadProducts();
-      });
-    });
+    imageUrl = publicUrl.publicUrl;
   }
 
-  // Clear form
-  function clearForm() {
-    document.getElementById('prodId').value = '';
-    document.getElementById('name').value = '';
-    document.getElementById('price').value = '';
-    document.getElementById('colors').value = '';
-    document.getElementById('sizes').value = '';
-    document.getElementById('description').value = '';
-    document.getElementById('image').value = '';
-    const ex = document.getElementById('existingImage'); if (ex) ex.remove();
+  // 🧩 بيانات المنتج
+  const productData = {
+    title,
+    price,
+    description,
+    colors,
+    sizes,
+    is_featured,
+  };
+
+  if (imageUrl) {
+    productData.image = imageUrl;
   }
 
-  // about & reviews
-  async function loadAboutAndReviews() {
-    // سنخزن النصوص في جدول products_content أو بإمكاننا استخدام صفوف خاصة في table 'sitecontent'
-    // هنا سنستخدم جدول بسيط 'sitecontent' مع key,value (إذا لم يكن موجودًا فسنستخدم localStorage كحل مؤقت)
-    try {
-      const { data } = await supabase.from('sitecontent').select('*').in('key', ['about','reviews']);
-      if (data && data.length>0) {
-        data.forEach(r => {
-          if (r.key === 'about') document.getElementById('about').value = r.value;
-          if (r.key === 'reviews') document.getElementById('reviews').value = r.value;
-        });
-      } else {
-        // fallback to localStorage
-        document.getElementById('about').value = localStorage.getItem('about') || '';
-        document.getElementById('reviews').value = localStorage.getItem('reviews') || '';
-      }
-    } catch(err){ console.warn(err); }
+  let result;
+  if (id) {
+    // ✏️ تعديل منتج
+    result = await supabase.from("products").update(productData).eq("id", id);
+  } else {
+    // ➕ إضافة منتج جديد
+    result = await supabase.from("products").insert([productData]);
   }
 
-  // Save about
-  document.getElementById('btnSaveAbout').addEventListener('click', async ()=>{
-    const val = document.getElementById('about').value;
-    // upsert into sitecontent
-    const { data, error } = await supabase.from('sitecontent').upsert([{ key:'about', value: val }], { onConflict: ['key'] });
-    if (error) { alert('خطأ عند الحفظ'); console.error(error); return; }
-    alert('تم حفظ النص');
-  });
+  if (result.error) {
+    alert("❌ حدث خطأ: " + result.error.message);
+  } else {
+    alert("✅ تم حفظ المنتج بنجاح");
+    productForm.reset();
+    document.getElementById("productId").value = "";
+    loadProducts();
+  }
+});
 
-  // Save reviews
-  document.getElementById('btnSaveReviews').addEventListener('click', async ()=>{
-    const val = document.getElementById('reviews').value;
-    const { data, error } = await supabase.from('sitecontent').upsert([{ key:'reviews', value: val }], { onConflict: ['key'] });
-    if (error) { alert('خطأ عند الحفظ'); console.error(error); return; }
-    alert('تم حفظ الآراء');
-  });
+// ✏️ تعديل منتج
+async function editProduct(id) {
+  const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+  if (error) {
+    alert("❌ لم يتم العثور على المنتج");
+    return;
+  }
 
-  // Change password
-  document.getElementById('btnChangePass').addEventListener('click', async ()=>{
-    const newPass = document.getElementById('newPass').value;
-    if(!newPass) return alert('أدخل كلمة مرور جديدة');
-    // تحديث جدول admin
-    const { data, error } = await supabase.from('admin').update({ password: newPass }).eq('username', adminUser);
-    if (error) { alert('خطأ عند تغيير كلمة المرور'); console.error(error); return; }
-    alert('تم تغيير كلمة المرور بنجاح');
-  });
+  document.getElementById("productId").value = data.id;
+  document.getElementById("title").value = data.title;
+  document.getElementById("price").value = data.price;
+  document.getElementById("description").value = data.description;
+  document.getElementById("colors").value = data.colors;
+  document.getElementById("sizes").value = data.sizes;
+  document.getElementById("isFeatured").value = data.is_featured ? "true" : "false";
+}
 
-  // Logout
-  document.getElementById('btnLogout').addEventListener('click', ()=>{
-    localStorage.removeItem('adminUser');
-    location.href = 'index.html';
-  });
+// 🗑️ حذف منتج
+async function deleteProduct(id) {
+  if (!confirm("⚠️ هل أنت متأكد من حذف هذا المنتج؟")) return;
 
+  const { error } = await supabase.from("products").delete().eq("id", id);
+  if (error) {
+    alert("❌ فشل الحذف: " + error.message);
+  } else {
+    alert("🗑️ تم حذف المنتج بنجاح");
+    loadProducts();
+  }
 }
