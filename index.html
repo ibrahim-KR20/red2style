@@ -2,99 +2,358 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RED 2 STYLE | متجر الألبسة الرجالية</title>
-  <meta name="description" content="RED 2 STYLE - من المصنع إلى العميل مباشرة. تصميمات فريدة وجودة عالية للألبسة الرياضية الرجالية." />
-  <meta name="keywords" content="ملابس رجالية, ألبسة رياضية, متجر ملابس, RED 2 STYLE" />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RED 2 STYLE - متجر الألبسة الرجالية</title>
+  <meta name="description" content="RED 2 STYLE - تصاميم وموديلات رجالية رياضية من المصنع مباشرة إلى العميل." />
+  <meta name="keywords" content="ملابس رجالية, ألبسة رياضية, RED 2 STYLE, ملابس, متجر" />
+  <meta name="theme-color" content="#e63946" />
+  <link rel="icon" href="https://via.placeholder.com/64x64?text=R2S" />
+  <style>
+    :root{
+      --bg:#0b0b0b; --card:#0f0f10; --muted:#c8c8c8;
+      --accent:#e63946; --accent2:#ff6b00; --white:#fff;
+      --maxwidth:1200px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Cairo, sans-serif;background:linear-gradient(180deg,#070707,#0f0f10);color:var(--white);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--maxwidth);margin:0 auto;padding:16px}
+
+    /* header */
+    header.sitebar{background:linear-gradient(90deg,var(--accent),var(--accent2));padding:14px 0;position:sticky;top:0;z-index:50}
+    .sitebar .row{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:var(--maxwidth);margin:0 auto;padding:0 16px}
+    .brand{font-weight:800;font-size:20px;cursor:pointer}
+    nav a{margin:0 8px;padding:8px 10px;border-radius:8px;color:#fff;font-weight:600}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{padding:8px 10px;border-radius:8px;border:none;min-width:180px}
+
+    /* ticker */
+    .ticker{background:#111;padding:8px 0;color:var(--accent2);font-weight:700}
+    .ticker .inner{white-space:nowrap;display:block;overflow:hidden}
+    .ticker .scroll{display:inline-block;padding-left:100%;animation:marq 18s linear infinite}
+    @keyframes marq{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
+    /* hero / featured */
+    .hero{padding:20px 0}
+    .featured-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .feat-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:12px;display:flex;flex-direction:column;align-items:center}
+    .feat-card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+    .feat-card h4{margin:8px 0 4px;color:var(--accent2)}
+    .feat-card .price{color:var(--accent);font-weight:800}
+
+    /* products grid */
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin:18px 0}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .card{background:#0b0b0b;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column}
+    .card img{width:100%;height:220px;object-fit:cover;border-radius:8px}
+    .card .info{padding:8px 0;flex:1}
+    .card h3{margin:6px 0;color:var(--accent2)}
+    .meta{color:var(--muted);font-size:14px}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .chip{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:13px}
+
+    .card .actions{display:flex;gap:8px;margin-top:10px}
+    .btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    /* modal */
+    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:200}
+    .modal{background:#0f0f10;padding:18px;border-radius:12px;width:100%;max-width:520px}
+    .modal h4{margin:0 0 8px;color:var(--accent2)}
+    .modal .row{display:flex;gap:8px;align-items:center}
+    .select, .qty{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+
+    /* cart indicator */
+    .cart-badge{background:var(--accent);color:#fff;padding:6px 8px;border-radius:20px;font-weight:700}
+
+    /* footer */
+    footer{padding:20px 0;text-align:center;color:var(--muted);margin-top:28px}
+
+    /* responsive */
+    @media(max-width:900px){
+      .sitebar .row{flex-direction:column;align-items:flex-start}
+      .card img{height:180px}
+      .feat-card img{height:140px}
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ===== رأس الصفحة ===== -->
-  <header class="header">
-    <div class="logo" onclick="location.reload()">RED 2 STYLE</div>
-    <nav class="nav">
-      <a href="#offers">العروض</a>
-      <a href="#products">المنتجات</a>
-      <a href="#about">من نحن</a>
-      <a href="#reviews">آراء العملاء</a>
-      <a href="#contact">تواصل معنا</a>
-    </nav>
+  <!-- header -->
+  <header class="sitebar">
+    <div class="row container">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="brand" onclick="scrollToTop()">RED 2 STYLE</div>
+        <div class="cart-badge" id="cartCount">0</div>
+      </div>
+      <nav>
+        <a href="#featured">العروض</a>
+        <a href="#products">المنتجات</a>
+        <a href="#about">من نحن</a>
+        <a href="#reviews">آراء العملاء</a>
+        <a href="#contact">تواصل</a>
+      </nav>
+      <div class="search">
+        <input id="q" placeholder="ابحث عن منتج..." />
+        <button class="btn ghost" onclick="doSearch()">بحث</button>
+      </div>
+    </div>
+    <div class="ticker"><div class="container inner"><div class="scroll" id="tickerText">🏷️ خصومات وموديلات جديدة تصل يومياً — شحن مجاني لطلبات محددة!</div></div></div>
   </header>
 
-  <!-- ===== شريط العروض ===== -->
-  <div class="ticker">
-    <p>🔥 عروض حصرية - شحن مجاني للطلبات فوق 500 TL - خصومات تصل حتى 40% 🔥</p>
+  <main class="container">
+
+    <!-- featured/banner -->
+    <section id="featured" class="hero">
+      <h2 style="color:var(--accent2)">العروض الخاصة</h2>
+      <div class="featured-grid" id="featuredGrid">
+        <!-- loaded via JS -->
+      </div>
+    </section>
+
+    <!-- products -->
+    <section id="products">
+      <div class="section-title"><h2 style="color:var(--accent2)">منتجاتنا</h2><div class="hint" id="productsCount"></div></div>
+      <div class="products-grid" id="productsGrid">
+        <!-- loaded via JS -->
+      </div>
+    </section>
+
+    <!-- about -->
+    <section id="about" style="margin-top:22px">
+      <h2 style="color:var(--accent2)">من نحن</h2>
+      <div id="aboutText" style="background:#0b0b0b;padding:12px;border-radius:10px;margin-top:8px;color:var(--muted)">
+        <!-- loaded -->
+      </div>
+    </section>
+
+    <!-- reviews -->
+    <section id="reviews" style="margin-top:18px">
+      <h2 style="color:var(--accent2)">آراء العملاء</h2>
+      <div id="reviewsList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px">
+        <!-- loaded -->
+      </div>
+    </section>
+
+    <footer id="contact" style="margin-top:32px">
+      <div>تابعنا: <a href="https://www.tiktok.com/@original.sport.3?lang=ar" target="_blank">TikTok</a> — <a href="https://www.instagram.com/original_sport3?igsh=ZjU0ZDg3ZDhyNmww" target="_blank">Instagram</a></div>
+      <div style="margin-top:8px">واتساب: +90 552 580 2041</div>
+    </footer>
+  </main>
+
+  <!-- modal choose options -->
+  <div class="modal-back" id="modalBack">
+    <div class="modal">
+      <h4 id="modalTitle">اختر اللون والمقاس</h4>
+      <div style="margin:8px 0" id="modalProductInfo"></div>
+      <div class="row" style="margin-top:8px">
+        <select id="modalColor" class="select"></select>
+        <select id="modalSize" class="select"></select>
+        <input id="modalQty" class="qty" type="number" min="1" value="1" style="width:88px"/>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn primary" id="modalAdd">أضف إلى السلة</button>
+        <button class="btn ghost" id="modalWhats">طلب عبر واتساب</button>
+        <button class="btn muted" id="modalClose">إلغاء</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== قسم العروض ===== -->
-  <section id="offers" class="offers">
-    <h2>عروضنا الخاصة</h2>
-    <div class="offers-grid">
-      <div class="offer-card">
-        <img src="assets/images/offer1.jpg" alt="عرض 1" />
-        <h3>طقم رياضي مميز</h3>
-        <p>خصم 30% لفترة محدودة</p>
-      </div>
-      <div class="offer-card">
-        <img src="assets/images/offer2.jpg" alt="عرض 2" />
-        <h3>جاكيت شتوي أنيق</h3>
-        <p>سعر خاص: 199 TL</p>
-      </div>
-      <div class="offer-card">
-        <img src="assets/images/offer3.jpg" alt="عرض 3" />
-        <h3>قميص صيفي فاخر</h3>
-        <p>اشتر 2 واحصل على الثالث مجانًا</p>
-      </div>
-    </div>
-  </section>
+  <!-- floating whatsapp -->
+  <a class="whatsapp-float" id="waFloat" href="#" style="position:fixed;left:18px;bottom:18px;background:linear-gradient(180deg,#25d366,#128c7e);width:56px;height:56px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;z-index:120" target="_blank">💬</a>
 
-  <!-- ===== قسم المنتجات ===== -->
-  <section id="products" class="products">
-    <h2>منتجاتنا</h2>
-    <div class="product-grid" id="productGrid">
-      <!-- سيتم إدخال المنتجات هنا من script.js -->
-    </div>
-  </section>
+  <!-- supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // ---------- إعداد Supabase (استخدم القيم التي أعطيتها) ----------
+    const SUPABASE_URL = "https://qbkkdsmhnmmrzsdewhde.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFia2tkc21obm1tcnpzZGV3aGRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MjQzMTIsImV4cCI6MjA3NTEwMDMxMn0.opDK0TlCbfCNlLpvMWFxM79myJkgUCIbufw1pbw8bP0";
 
-  <!-- ===== قسم من نحن ===== -->
-  <section id="about" class="about">
-    <h2>من نحن</h2>
-    <p>
-      نحن في <strong>RED 2 STYLE</strong> لسنا مجرد متجر ملابس رجالية، نحن مصنعون نصمم كل موديلاتنا بأنفسنا لنقدمها لك مباشرة دون وسطاء.
-      هدفنا أن نوفر لك تجربة تسوق مختلفة بمنتجات فريدة ذات جودة عالية وأسعار منافسة، من المصنع إلى خزانتك مباشرة 👕.
-    </p>
-  </section>
+    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <!-- ===== آراء العملاء ===== -->
-  <section id="reviews" class="reviews">
-    <h2>آراء عملائنا</h2>
-    <div class="reviews-grid">
-      <div class="review">⭐️⭐️⭐️⭐️⭐️ "أفضل متجر تعاملت معه! جودة ممتازة وتوصيل سريع." – أحمد.م</div>
-      <div class="review">⭐️⭐️⭐️⭐️⭐️ "التصاميم أنيقة جدًا والأسعار مناسبة. تجربة شراء رائعة." – سامي.ر</div>
-      <div class="review">⭐️⭐️⭐️⭐️ "الألوان مطابقة للصور والخامة ممتازة. شكراً RED 2 STYLE." – فراس.ع</div>
-      <div class="review">⭐️⭐️⭐️⭐️⭐️ "منتجات راقية وخدمة عملاء ممتازة. أنصح الجميع." – كريم.ف</div>
-    </div>
-  </section>
+    // رقم الواتساب للمحل (بدون +)
+    const WA_PHONE = '905525802041';
 
-  <!-- ===== قسم التواصل ===== -->
-  <section id="contact" class="contact">
-    <h2>تواصل معنا</h2>
-    <div class="social-links">
-      <a href="https://www.tiktok.com/@original.sport.3" target="_blank">TikTok</a>
-      <a href="https://www.instagram.com/original_sport3" target="_blank">Instagram</a>
-      <a href="https://wa.me/905525802041" target="_blank">واتساب</a>
-    </div>
-  </section>
+    // حالة
+    let PRODUCTS = [];
+    let FEATURED_IDS = []; // from sitecontent 'featured' as "1,2,3"
+    let SITE_CONTENT = {};
 
-  <!-- ===== التذييل ===== -->
-  <footer class="footer">
-    <p>© 2025 RED 2 STYLE - جميع الحقوق محفوظة</p>
-  </footer>
+    // عناصر DOM
+    const featuredGrid = document.getElementById('featuredGrid');
+    const productsGrid = document.getElementById('productsGrid');
+    const aboutText = document.getElementById('aboutText');
+    const reviewsList = document.getElementById('reviewsList');
+    const cartCount = document.getElementById('cartCount');
+    const productsCount = document.getElementById('productsCount');
 
-  <!-- ===== زر واتساب عائم ===== -->
-  <a href="https://wa.me/905525802041" class="whatsapp-float" target="_blank">💬</a>
+    // modal
+    const modalBack = document.getElementById('modalBack');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalProductInfo = document.getElementById('modalProductInfo');
+    const modalColor = document.getElementById('modalColor');
+    const modalSize = document.getElementById('modalSize');
+    const modalQty = document.getElementById('modalQty');
+    const modalAdd = document.getElementById('modalAdd');
+    const modalWhats = document.getElementById('modalWhats');
+    const modalClose = document.getElementById('modalClose');
 
-  <script src="script.js"></script>
+    // تحميل البيانات من Supabase
+    async function loadAll(){
+      await Promise.all([loadSiteContent(), loadProducts()]);
+      renderFeatured();
+      renderProducts(PRODUCTS);
+      renderAboutReviews();
+      updateCartBadge();
+    }
+
+    async function loadSiteContent(){
+      try{
+        const { data } = await supabase.from('sitecontent').select('*').in('key', ['about','reviews','featured']).maybeSingle();
+        // supabase .select with maybeSingle returns single object only if matching one, but better to query all:
+        const { data: rows } = await supabase.from('sitecontent').select('*');
+        if(rows && rows.length>0){
+          rows.forEach(r => SITE_CONTENT[r.key] = r.value);
+          if(SITE_CONTENT.featured) FEATURED_IDS = SITE_CONTENT.featured.split(',').map(x=>x.trim()).filter(Boolean);
+        }
+      }catch(e){ console.error(e) }
+    }
+
+    async function loadProducts(){
+      try{
+        const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending:false });
+        if(error){ console.error(error); PRODUCTS = []; return; }
+        PRODUCTS = data || [];
+      }catch(e){ console.error(e); PRODUCTS = []; }
+    }
+
+    function renderFeatured(){
+      featuredGrid.innerHTML = '';
+      let featured = [];
+      if(FEATURED_IDS.length>0){
+        FEATURED_IDS.forEach(id=>{
+          const p = PRODUCTS.find(x => String(x.id) === String(id));
+          if(p) featured.push(p);
+        });
+      }
+      // fallback: use first 3 if none specified
+      if(featured.length === 0) featured = PRODUCTS.slice(0,3);
+      featured.forEach(p => {
+        const el = document.createElement('div'); el.className='feat-card';
+        el.innerHTML = `<img src="${p.image_url || 'https://via.placeholder.com/600x400?text=No+Image'}" alt="${p.name}">
+          <h4>${p.name}</h4>
+          <div class="price">${p.price}</div>
+          <div style="margin-top:8px"><button class="btn primary" onclick="openModal(${p.id})">أضف للسلة</button></div>`;
+        featuredGrid.appendChild(el);
+      });
+    }
+
+    function renderProducts(list){
+      productsGrid.innerHTML = '';
+      productsCount.innerText = `${list.length} منتج`;
+      list.forEach(p=>{
+        const div = document.createElement('div'); div.className='card';
+        const colors = (p.colors || '').split(',').map(s=>s.trim()).filter(Boolean);
+        const sizes = (p.sizes || '').split(',').map(s=>s.trim()).filter(Boolean);
+        div.innerHTML = `
+          <img src="${p.image_url || 'https://via.placeholder.com/800x800?text=No+Image'}" alt="${p.name}">
+          <div class="info">
+            <h3>${p.name}</h3>
+            <div class="meta">${p.description || ''}</div>
+            <div class="chips">
+              <div class="chip">السعر: ${p.price}</div>
+              ${colors.length ? `<div class="chip">الألوان: ${colors.join(', ')}</div>` : ''}
+              ${sizes.length ? `<div class="chip">المقاسات: ${sizes.join(', ')}</div>` : ''}
+            </div>
+            <div class="actions">
+              <button class="btn primary" onclick="openModal(${p.id})">أضف إلى السلة</button>
+              <button class="btn ghost" onclick="orderWhats('${p.id}')">طلب عبر واتساب</button>
+            </div>
+          </div>
+        `;
+        productsGrid.appendChild(div);
+      });
+    }
+
+    // البحث
+    function doSearch(){
+      const q = document.getElementById('q').value.trim();
+      if(!q) return renderProducts(PRODUCTS);
+      const filtered = PRODUCTS.filter(p => (p.name||'').includes(q) || (p.description||'').includes(q) || (p.price||'').includes(q));
+      renderProducts(filtered);
+    }
+
+    // modal logic
+    let currentProduct = null;
+    function openModal(id){
+      const p = PRODUCTS.find(x=>String(x.id)===String(id));
+      if(!p) return alert('المنتج غير موجود');
+      currentProduct = p;
+      modalTitle.innerText = `اختيار: ${p.name}`;
+      modalProductInfo.innerHTML = `<div style="color:var(--muted);font-size:14px">${p.description || ''}</div>`;
+      // fill colors & sizes
+      const colors = (p.colors||'').split(',').map(s=>s.trim()).filter(Boolean);
+      const sizes = (p.sizes||'').split(',').map(s=>s.trim()).filter(Boolean);
+      modalColor.innerHTML = colors.length ? colors.map(c=>`<option value="${c}">${c}</option>`).join('') : `<option value="">لايوجد ألوان</option>`;
+      modalSize.innerHTML = sizes.length ? sizes.map(s=>`<option value="${s}">${s}</option>`).join('') : `<option value="">لايوجد مقاسات</option>`;
+      modalQty.value = 1;
+      modalBack.style.display = 'flex';
+    }
+    modalClose.addEventListener('click', ()=> modalBack.style.display='none');
+
+    // add to cart (localStorage simple)
+    modalAdd.addEventListener('click', ()=>{
+      if(!currentProduct) return;
+      const color = modalColor.value || '';
+      const size = modalSize.value || '';
+      const qty = parseInt(modalQty.value) || 1;
+      const cart = JSON.parse(localStorage.getItem('r2s_cart')||'[]');
+      cart.push({ id: currentProduct.id, name: currentProduct.name, price: currentProduct.price, color, size, qty });
+      localStorage.setItem('r2s_cart', JSON.stringify(cart));
+      updateCartBadge();
+      modalBack.style.display='none';
+      alert('تمت إضافة المنتج إلى السلة');
+    });
+
+    function updateCartBadge(){
+      const cart = JSON.parse(localStorage.getItem('r2s_cart')||'[]');
+      cartCount.innerText = cart.length;
+    }
+
+    // WhatsApp order from modal or direct
+    modalWhats.addEventListener('click', ()=>{
+      if(!currentProduct) return;
+      const color = modalColor.value || '-';
+      const size = modalSize.value || '-';
+      const qty = modalQty.value || 1;
+      const message = `مرحباً، أود طلب المنتج:\n*${currentProduct.name}*\nالسعر: ${currentProduct.price}\nاللون: ${color}\nالمقاس: ${size}\nالكمية: ${qty}\n\nالرجاء تواصلوني لإتمام الطلب.`;
+      const url = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(message)}`;
+      window.open(url,'_blank');
+    });
+
+    // direct order (from product card)
+    function orderWhats(id){
+      const p = PRODUCTS.find(x=>String(x.id)===String(id));
+      if(!p) return alert('المنتج غير موجود');
+      // open modal with defaults then send
+      currentProduct = p;
+      const color = (p.colors||'').split(',').map(s=>s.trim()).filter(Boolean)[0] || '-';
+      const size = (p.sizes||'').split(',').map(s=>s.trim()).filter(Boolean)[0] || '-';
+      const message = `مرحباً، أود طلب المنتج:\n*${p.name}*\nالسعر: ${p.price}\nاللون: ${color}\nالمقاس: ${size}\nالكمية: 1\n\nالرجاء تواصلوني لإتمام الطلب.`;
+      const url = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(message)}`;
+      window.open(url,'_blank');
+    }
+
+    // scroll to top
+    function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}) }
+
+    // initial load
+    loadAll();
+
+    // set whatsapp float link
+    document.getElementById('waFloat').href = `https://wa.me/${WA_PHONE}`;
+
+  </script>
 </body>
 </html>
